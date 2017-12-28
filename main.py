@@ -21,10 +21,11 @@ DATA_DIR = './data'
 RUNS_DIR = './runs'
 IMG_SHAPE = (160, 576)
 NUM_CLASSES = 2
-NUM_EPOCHS = 20
+NUM_EPOCHS = 30
 BATCH_SIZE = 5
 KEEP_PROB = 0.5
 LEARNING_RATE = 0.0001
+LINE_LEN = 25
 
 
 def load_vgg(sess, vgg_path):
@@ -124,10 +125,11 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     """
     for epoch in range(epochs):
         print('EPOCH: {}'.format(epoch))
-        print('=' * 20)
+        print('=' * LINE_LEN)
 
         losses_in_epoch = []
-        for images, labels in get_batches_fn(batch_size):
+        for i, batch in enumerate(get_batches_fn(batch_size)):
+            images, labels = batch
             feed_dict = {
                 input_image: images,
                 correct_label: labels,
@@ -136,11 +138,11 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 
             _, loss = sess.run([train_op, cross_entropy_loss], feed_dict=feed_dict)
             losses_in_epoch.append(loss)
-            print('Loss: {:.5f}'.format(loss))
-            print('-' * 20)
+            print('Batch {:02d} Loss: {:.5f}'.format(i, loss))
         
         mean_epoch_loss = np.mean(losses_in_epoch)
-        print('Mean Epoch Loss: {:.5f}'.format(mean_epoch_loss))
+        print('-' * LINE_LEN)
+        print('Mean Loss for Epoch {}: {:.5f}'.format(epoch, mean_epoch_loss))
 
 
 def run():
@@ -187,7 +189,7 @@ def run_tests():
     tests.test_train_nn(train_nn)
     tests.test_for_kitti_dataset(DATA_DIR)
     print('All Tests Passed')
-    print('=' * 20)
+    print('=' * LINE_LEN)
 
 
 if __name__ == '__main__':
