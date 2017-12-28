@@ -143,6 +143,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         mean_epoch_loss = np.mean(losses_in_epoch)
         print('-' * LINE_LEN)
         print('Mean Loss for Epoch {}: {:.5f}'.format(epoch, mean_epoch_loss))
+        print('-' * LINE_LEN)
 
 
 def run():
