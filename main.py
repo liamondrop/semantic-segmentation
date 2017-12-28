@@ -1,5 +1,6 @@
 import os.path
 import tensorflow as tf
+import numpy as np
 import helper
 import warnings
 from distutils.version import LooseVersion
@@ -15,6 +16,15 @@ if not tf.test.gpu_device_name():
     warnings.warn('No GPU found. Please use a GPU to train your neural network.')
 else:
     print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+
+DATA_DIR = './data'
+RUNS_DIR = './runs'
+IMG_SHAPE = (160, 576)
+NUM_CLASSES = 2
+NUM_EPOCHS = 20
+BATCH_SIZE = 5
+KEEP_PROB = 0.5
+LEARNING_RATE = 0.0001
 
 
 def load_vgg(sess, vgg_path):
@@ -56,8 +66,8 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     def conv_layer(inputs, name):
         return tf.layers.conv2d(inputs, num_classes, kernel_size=(1,1), strides=(1,1), name=name)
 
-    def upsample_layer(inputs, name):
-        return tf.layers.conv2d_transpose(inputs, num_classes, kernel_size=(4,4), strides=(2,2), padding='same', name=name)
+    def upsample_layer(inputs, name, k, s):
+        return tf.layers.conv2d_transpose(inputs, num_classes, kernel_size=(k,k), strides=(s,s), padding='same', name=name)
 
     # 1x1 convolution of vgg layers
     conv_layer3 = conv_layer(vgg_layer3_out, 'conv_layer3')
@@ -65,11 +75,11 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     conv_layer7 = conv_layer(vgg_layer7_out, 'conv_layer7')
 
     # Add decoder layers to the model with upsampling and skip connections
-    decoder_layer1 = upsample_layer(conv_layer7, 'decoder_layer1')
+    decoder_layer1 = upsample_layer(conv_layer7, 'decoder_layer1', k=4, s=2)
     decoder_layer2 = tf.add(decoder_layer1, conv_layer4, name='decoder_layer2')
-    decoder_layer3 = upsample_layer(decoder_layer2, 'decoder_layer3')
+    decoder_layer3 = upsample_layer(decoder_layer2, 'decoder_layer3', k=4, s=2)
     decoder_layer4 = tf.add(decoder_layer3, conv_layer3, name='decoder_layer4')
-    decoder_output = upsample_layer(decoder_layer4, 'decoder_output')
+    decoder_output = upsample_layer(decoder_layer4, 'decoder_output', k=16, s=8)
     return decoder_output
 
 
@@ -82,7 +92,6 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-
     # Reshape 4D outputs to 2D, in which each row represents a pixel and each column a class
     logits = tf.reshape(nn_last_layer, (-1, num_classes))
     labels = tf.reshape(correct_label, (-1, num_classes))
@@ -113,63 +122,74 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    keep_prob = 0.75
-    learning_rate = 0.0001
-
     for epoch in range(epochs):
-        print("EPOCH {} ...".format(epoch))
+        print('EPOCH: {}'.format(epoch))
+        print('=' * 20)
 
+        losses_in_epoch = []
         for images, labels in get_batches_fn(batch_size):
             feed_dict = {
                 input_image: images,
                 correct_label: labels,
-                keep_prob: keep_prob,
-                learning_rate: learning_rate}
+                keep_prob: KEEP_PROB,
+                learning_rate: LEARNING_RATE}
 
             _, loss = sess.run([train_op, cross_entropy_loss], feed_dict=feed_dict)
-            print("Loss: = {:.5f}".format(loss))
-            print("-" * 20)
+            losses_in_epoch.append(loss)
+            print('Loss: {:.5f}'.format(loss))
+            print('-' * 20)
+        
+        mean_epoch_loss = np.mean(losses_in_epoch)
+        print('Mean Epoch Loss: {:.5f}'.format(mean_epoch_loss))
 
 
 def run():
-    num_classes = 2
-    image_shape = (160, 576)
-    data_dir = './data'
-    runs_dir = './runs'
-    tests.test_for_kitti_dataset(data_dir)
+    # Paths to vgg model and training data
+    vgg_path = os.path.join(DATA_DIR, 'vgg')
+    training_path = os.path.join(DATA_DIR, 'data_road/training')
 
     # Download pretrained vgg model
-    helper.maybe_download_pretrained_vgg(data_dir)
+    helper.maybe_download_pretrained_vgg(DATA_DIR)
 
-    # OPTIONAL: Train and Inference on the cityscapes dataset instead of the Kitti dataset.
-    # You'll need a GPU with at least 10 teraFLOPS to train on.
-    #  https://www.cityscapes-dataset.com/
+    # Create function to get batches
+    get_batches_fn = helper.gen_batch_function(training_path, IMG_SHAPE)
 
     with tf.Session() as sess:
-        # Path to vgg model
-        vgg_path = os.path.join(data_dir, 'vgg')
+        # Placeholders
+        num_rows, num_cols = IMG_SHAPE
+        correct_label = tf.placeholder(tf.int32, [None, num_rows, num_cols, NUM_CLASSES], name='correct_label')
+        learning_rate = tf.placeholder(tf.float32, name='learning_rate')
 
-        # Create function to get batches
-        get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/training'), image_shape)
+        # Load the image input, keep probability and vgg layers from the vgg architecture
+        image_input, keep_prob, vgg_layer3, vgg_layer4, vgg_layer7 = load_vgg(sess, vgg_path)
 
-        # OPTIONAL: Augment Images for better results
-        #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
+        # Add a decoder layer to the vgg model
+        decoder_output = layers(vgg_layer3, vgg_layer4, vgg_layer7, NUM_CLASSES)
 
-        # TODO: Build NN using load_vgg, layers, and optimize function
+        # Build the loss and optimizer operations
+        logits, train_op, cross_entropy_loss = optimize(decoder_output, correct_label, learning_rate, NUM_CLASSES)
 
-        # TODO: Train NN using the train_nn function
+        # Initialize the TF Variables
+        sess.run(tf.global_variables_initializer())
 
-        # TODO: Save inference data using helper.save_inference_samples
-        #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        # Train the network
+        train_nn(sess, NUM_EPOCHS, BATCH_SIZE, get_batches_fn,
+                 train_op, cross_entropy_loss, image_input,
+                 correct_label, keep_prob, learning_rate)
 
-        # OPTIONAL: Apply the trained model to a video
+        # Save inference samples on test images
+        helper.save_inference_samples(RUNS_DIR, DATA_DIR, sess, IMG_SHAPE, logits, keep_prob, image_input)
 
 def run_tests():
     tests.test_load_vgg(load_vgg, tf)
     tests.test_layers(layers)
     tests.test_optimize(optimize)
     tests.test_train_nn(train_nn)
+    tests.test_for_kitti_dataset(DATA_DIR)
+    print('All Tests Passed')
+    print('=' * 20)
 
 
 if __name__ == '__main__':
     run_tests()
+    run()
