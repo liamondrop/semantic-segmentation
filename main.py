@@ -53,8 +53,24 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :param num_classes: Number of classes to classify
     :return: The Tensor for the last layer of output
     """
-    # TODO: Implement function
-    return None
+    def conv_layer(inputs, name):
+        return tf.layers.conv2d(inputs, num_classes, kernel_size=(1,1), strides=(1,1), name=name)
+
+    def upsample_layer(inputs, name):
+        return tf.layers.conv2d_transpose(inputs, num_classes, kernel_size=(4,4), strides=(2,2), padding='same', name=name)
+
+    # 1x1 convolution of vgg layers
+    conv_layer3 = conv_layer(vgg_layer3_out, 'conv_layer3')
+    conv_layer4 = conv_layer(vgg_layer4_out, 'conv_layer4')
+    conv_layer7 = conv_layer(vgg_layer7_out, 'conv_layer7')
+
+    # Add decoder layers to the model with upsampling and skip connections
+    decoder_layer1 = upsample_layer(conv_layer7, 'decoder_layer1')
+    decoder_layer2 = tf.add(decoder_layer1, conv_layer4, name='decoder_layer2')
+    decoder_layer3 = upsample_layer(decoder_layer2, 'decoder_layer3')
+    decoder_layer4 = tf.add(decoder_layer3, conv_layer3, name='decoder_layer4')
+    decoder_output = upsample_layer(decoder_layer4, 'decoder_output')
+    return decoder_output
 
 
 def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
@@ -66,8 +82,20 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-    # TODO: Implement function
-    return None, None, None
+
+    # Reshape 4D outputs to 2D, in which each row represents a pixel and each column a class
+    logits = tf.reshape(nn_last_layer, (-1, num_classes))
+    labels = tf.reshape(correct_label, (-1, num_classes))
+
+    # Define cross entropy loss function
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+    cross_entropy_loss = tf.reduce_mean(cross_entropy)
+
+    # Find the weights and parameters to yield correct pixel labels
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    train_op = optimizer.minimize(cross_entropy_loss)
+
+    return logits, train_op, cross_entropy_loss
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
@@ -85,8 +113,22 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    # TODO: Implement function
-    pass
+    keep_prob = 0.75
+    learning_rate = 0.0001
+
+    for epoch in range(epochs):
+        print("EPOCH {} ...".format(epoch))
+
+        for images, labels in get_batches_fn(batch_size):
+            feed_dict = {
+                input_image: images,
+                correct_label: labels,
+                keep_prob: keep_prob,
+                learning_rate: learning_rate}
+
+            _, loss = sess.run([train_op, cross_entropy_loss], feed_dict=feed_dict)
+            print("Loss: = {:.5f}".format(loss))
+            print("-" * 20)
 
 
 def run():
