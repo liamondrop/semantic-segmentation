@@ -4,16 +4,7 @@
 
 ## Work In Progress!
 
-<table>
-  <thead>
-    <tr>
-      <td>Batch Size: 5</td>
-      <td>Batch Size: 1</td>
-    <tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
+#### Batch Size: 5
 ```
 Mean Loss for Epoch 0: 7.95103
 Mean Loss for Epoch 1: 1.06085
@@ -28,8 +19,8 @@ Mean Loss for Epoch 20: 0.12230
 ...
 Mean Loss for Epoch 29: 0.07512
 ```
-      </td>
-      <td>
+
+#### Batch Size: 1
 ```
 Mean Loss for Epoch 0: 2.04790
 Mean Loss for Epoch 1: 0.57692
@@ -44,7 +35,18 @@ Mean Loss for Epoch 20: 0.04489
 ...
 Mean Loss for Epoch 29: 0.04383
 ```
-      </td>
+
+<table>
+  <thead>
+    <tr>
+      <td>Batch Size: 5</td>
+      <td>Batch Size: 1</td>
+    <tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img src="./runs/1514501011.7429824/um_000006.png" /></td>
+      <td><img src="./runs/1514505442.9463637/um_000006.png" /></td>
     <tr>
     <tr>
       <td><img src="./runs/1514501011.7429824/um_000006.png" /></td>
