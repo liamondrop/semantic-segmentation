@@ -14,36 +14,36 @@
   <tbody>
     <tr>
       <td>
-        ```
-        Mean Loss for Epoch 0: 7.95103
-        Mean Loss for Epoch 1: 1.06085
-        Mean Loss for Epoch 2: 0.80397
-        Mean Loss for Epoch 3: 0.71278
-        Mean Loss for Epoch 4: 0.65243
-        Mean Loss for Epoch 5: 0.59932
-        ...
-        Mean Loss for Epoch 10: 0.26280
-        ...
-        Mean Loss for Epoch 20: 0.12230
-        ...
-        Mean Loss for Epoch 29: 0.07512
-        ```
+```
+Mean Loss for Epoch 0: 7.95103
+Mean Loss for Epoch 1: 1.06085
+Mean Loss for Epoch 2: 0.80397
+Mean Loss for Epoch 3: 0.71278
+Mean Loss for Epoch 4: 0.65243
+Mean Loss for Epoch 5: 0.59932
+...
+Mean Loss for Epoch 10: 0.26280
+...
+Mean Loss for Epoch 20: 0.12230
+...
+Mean Loss for Epoch 29: 0.07512
+```
       </td>
       <td>
-        ```
-        Mean Loss for Epoch 0: 2.04790
-        Mean Loss for Epoch 1: 0.57692
-        Mean Loss for Epoch 2: 0.30044
-        Mean Loss for Epoch 3: 0.19735
-        Mean Loss for Epoch 4: 0.16494
-        Mean Loss for Epoch 5: 0.14135
-        ...
-        Mean Loss for Epoch 10: 0.07920
-        ...
-        Mean Loss for Epoch 20: 0.04489
-        ...
-        Mean Loss for Epoch 29: 0.04383
-        ```
+```
+Mean Loss for Epoch 0: 2.04790
+Mean Loss for Epoch 1: 0.57692
+Mean Loss for Epoch 2: 0.30044
+Mean Loss for Epoch 3: 0.19735
+Mean Loss for Epoch 4: 0.16494
+Mean Loss for Epoch 5: 0.14135
+...
+Mean Loss for Epoch 10: 0.07920
+...
+Mean Loss for Epoch 20: 0.04489
+...
+Mean Loss for Epoch 29: 0.04383
+```
       </td>
     <tr>
     <tr>
