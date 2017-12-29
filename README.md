@@ -2,7 +2,28 @@
 
 [![Udacity - Self-Driving Car Nanodegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-## Work In Progress!
+
+## Architecture
+
+#### Encoder
+The encoder for the fully convolutional network is the VGG16 model pretrained on ImageNet for classification. The fully-connected layers are replaced by 1x1 convolutions.
+
+#### Decoder
+The decoder portion of the network is achieved by upsampling the input to the original image size. The shape of the tensor after the final convolutional transpose layer will be 4-dimensional: (`batch_size`, `original_height`, `original_width`, `num_classes`).
+
+#### Skip Connections
+The final step is to add skip connections to the model. In order to do this we combine the output of two layers (layers 3 and 4, in this case), adding them to lower-level layers (layer 7) upsampled through elementwise addition (`tf.add`).
+
+## Training
+The hyperparameters I ended up using for training are:
+
+```
+keep_prob: 0.5
+learning_rate: 0.0001
+epochs: 30
+```
+
+As an experiment, I ran the training 2 times, once with a batch size of 5 and once with a batch size of 1. Interestingly, batch size 1 resulted in better mean loss across all epochs, as well as cleaner classification of the pixels as shown in the image samples below.
 
 #### Batch Size: 5
 ```
@@ -36,11 +57,13 @@ Mean Loss for Epoch 20: 0.04489
 Mean Loss for Epoch 29: 0.04383
 ```
 
+#### Image Samples
+
 <table>
   <thead>
     <tr>
-      <td>Batch Size: 5</td>
-      <td>Batch Size: 1</td>
+      <td>1st Run, Batch Size: 5</td>
+      <td>2nd Run, Batch Size: 1</td>
     <tr>
   </thead>
   <tbody>
