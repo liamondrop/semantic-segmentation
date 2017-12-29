@@ -1,2 +1,4 @@
+data/*
 *.zip
 *.pem
+*.pyc
