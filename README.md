@@ -46,8 +46,8 @@ Mean Loss for Epoch 29: 0.04383
     <td><img src="./runs/1514505442.9463637/um_000017.png" /></td>
   <tr>
   <tr>
-    <td><img src="./runs/1514501011.7429824/umm_000030.png" /></td>
-    <td><img src="./runs/1514505442.9463637/umm_000030.png" /></td>
+    <td><img src="./runs/1514501011.7429824/umm_000031.png" /></td>
+    <td><img src="./runs/1514505442.9463637/umm_000031.png" /></td>
   <tr>
   <tr>
     <td><img src="./runs/1514501011.7429824/umm_000033.png" /></td>
@@ -60,6 +60,10 @@ Mean Loss for Epoch 29: 0.04383
   <tr>
     <td><img src="./runs/1514501011.7429824/umm_000092.png" /></td>
     <td><img src="./runs/1514505442.9463637/umm_000092.png" /></td>
+  <tr>
+  <tr>
+    <td><img src="./runs/1514501011.7429824/uu_000098.png" /></td>
+    <td><img src="./runs/1514505442.9463637/uu_000098.png" /></td>
   <tr>
 </table>
 
